@@ -1,9 +1,15 @@
-const express = require('express');
-const dotenv =require('dotenv');
-dotenv.config();
-const mongoose = require('mongoose');
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from'dotenv';
+import authRoute from'./routes/auth.js'
+import hotelsRoute from './routes/hotels.js'
+// const {roomsRoute}= require('./routes/rooms.js');
+// const {usersRoute}= require('./routes/users.js');
 
+dotenv.config();
 const app = express();
+
+app.use(express.json());
 
 const connect = async () =>{
     try {
@@ -23,6 +29,23 @@ mongoose.connection.on("connected",()=>{
 
 mongoose.connection.on("disconnected",()=>{
   console.log('MongoDB connected');
+})
+
+
+app.use('/api/auth',authRoute);
+app.use('/api/hotels',hotelsRoute);
+// app.use('/api/rooms',roomsRoute);
+// app.use('/api/users',usersRoute);
+
+app.use((err,req,res,next)=>{
+  const errorStatus = 400;
+  const errorMessage = err.message||"Something went wrong";
+  return res.status(errorStatus).send({
+    success:false,
+    status:errorStatus,
+    message:errorMessage,
+    stack:err.stack
+  })
 })
 
 app.listen(8000,()=>{
